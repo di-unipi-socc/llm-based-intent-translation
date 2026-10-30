@@ -93,6 +93,8 @@ def main():
     records = []
     for rec in runs.to_dict(orient="records"):
         rec = {k: clean(v) for k, v in rec.items()}
+        # Exclude identifier errors missed by the fact comparison.
+        rec["exact_match"] = int(rec["exact_match"] == 1 and rec["dips_error"] is not True)
         rec["model_key"] = f"{rec['model_name']}_{rec['model_size']}"
         rec["errors"] = errors_by_run.get(rec["run_id"], [])
         records.append(rec)

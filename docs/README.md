@@ -62,7 +62,7 @@ Each technique column contains its output, exact-match status, F1, DIPS outcome,
 | Recall | Fraction of reference normalized facts recovered by the translation. |
 | F1-score | Harmonic mean of precision and recall. |
 | Jaccard | Intersection divided by union of generated and reference fact sets. |
-| Exact match | The recorded generated and reference fact sets match after evaluation normalization. Aggregate views report the fraction of matching runs. |
+| Exact match | Generated and reference fact sets match after evaluation normalization, and DIPS reports no error. Aggregate views report the fraction of matching runs. |
 | Jaccard DIPS | Recorded overlap between placement sets obtained from generated and reference facts. Missing values appear as a dash; means use non-missing values and display their coverage. |
 | Inference time / Mean Latency | Model generation time in seconds, excluding DIPS processing. |
 | DIPS Solution | DIPS found a placement solution. This does not imply exact translation or agreement with the reference placement set. |
@@ -70,6 +70,8 @@ Each technique column contains its output, exact-match status, F1, DIPS outcome,
 | High / Low errors | Severity assigned by the error classifier. Low errors include stricter constraints; they do not establish placement feasibility. |
 
 Scores generally range from 0 to 1; exact-match and solution rates are also displayed as percentages. Error counts measure occurrences, not necessarily distinct affected runs. The 102 formulations represent 34 underlying scenarios, rather than 102 independent services.
+
+The export excludes runs with flagged DIPS errors from exact matches, including identifier errors missed by fact normalization. Original Parquet tables remain unchanged.
 
 See the [error taxonomy](../references/error_description.txt), [fact metrics implementation](../scripts/fact_metrics.py), and [source tables](../data/) for evaluation details.
 

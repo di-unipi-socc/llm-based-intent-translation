@@ -24,6 +24,9 @@
 
   const SCHEMAS = ["A", "B", "C"];
 
+  // Fact comparison alone can miss identifier errors detected by DIPS.
+  const isExact = (r) => r.exact_match === 1 && r.dips_error !== true;
+
   const ERROR_TYPES = {
     A: "Syntax",
     B: "Wrong values",
@@ -290,7 +293,7 @@
       return;
     }
 
-    const exact = run.exact_match === 1;
+    const exact = isExact(run);
     const errorRows = run.errors || [];
 
     root.innerHTML = `
@@ -388,7 +391,7 @@
 
     const n = runs.length;
     const nCtx = new Set(runs.map((r) => r.context_id)).size;
-    const exactRate = runs.filter((r) => r.exact_match === 1).length / n;
+    const exactRate = runs.filter(isExact).length / n;
     const jdRuns = runs.filter((r) => r.jaccard_dips != null);
     const totErr = runs.reduce((a, r) => a + (r.n_errors || 0), 0);
     const totHigh = runs.reduce((a, r) => a + (r.n_high || 0), 0);
@@ -434,7 +437,7 @@
         ${metricCard("Mean precision", mean(runs.map((r) => r.precision)))}
         ${metricCard("Mean Jaccard", mean(runs.map((r) => r.jaccard)))}
         ${metricCard("Mean F1-score", mean(runs.map((r) => r.f1)))}
-        ${metricCard("Exact match rate", exactRate, `${runs.filter((r) => r.exact_match === 1).length} / ${n} runs`, { display: pct(exactRate) })}
+        ${metricCard("Exact match rate", exactRate, `${runs.filter(isExact).length} / ${n} runs`, { display: pct(exactRate) })}
         ${metricCard("Mean Jaccard DIPS", mean(jdRuns.map((r) => r.jaccard_dips)), `over ${jdRuns.length} / ${n} runs`)}
         ${metricCard("Mean inference time", null, "LLM generation", {
           display: `${fmt(mean(runs.map((r) => r.time_s)), 1)}s`,
@@ -617,7 +620,7 @@
       const jaccArr = runs.map((r) => r.jaccard);
       const jdRuns = runs.filter((r) => r.jaccard_dips != null);
 
-      const exactCount = runs.filter((r) => r.exact_match === 1).length;
+      const exactCount = runs.filter(isExact).length;
       const exactRate = n ? exactCount / n : null;
 
       const dipsCounts = {};
@@ -649,7 +652,7 @@
         schemaPerf[s] = {
           n: sRuns.length,
           meanF1: mean(sRuns.map((r) => r.f1)),
-          exactRate: sRuns.length ? sRuns.filter((r) => r.exact_match === 1).length / sRuns.length : null,
+          exactRate: sRuns.length ? sRuns.filter(isExact).length / sRuns.length : null,
           solutionRate: sRuns.length ? sRuns.filter((r) => r.dips_outcome === "SOLUTION").length / sRuns.length : null,
         };
       });
@@ -1082,7 +1085,7 @@
         `;
       }
 
-      const exact = run.exact_match === 1;
+      const exact = isExact(run);
       const errors = run.errors || [];
 
       return `
