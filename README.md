@@ -2,7 +2,7 @@
 
 Companion repository containing the dataset, experiment scripts, and results for translating natural-language network intents into Prolog facts for [DIPS](dips/README.md). Experiments compare Qwen2.5 models (3B, 7B, and 14B) and Gemini using zero-shot and few-shot prompting, plus LoRA adaptation for Qwen2.5.
 
-**[Results dashboard](https://di-unipi-socc.github.io/llm-based-intent-translation/)** · [Dataset](dataset/) · [Result tables](data/) · [Prompt templates](references/prompts.txt)
+**[Results dashboard](https://di-unipi-socc.github.io/llm-based-intent-translation/)** · [Dashboard guide](docs/README.md) · [Dataset](dataset/) · [Result tables](data/) · [Prompt templates](references/prompts.txt)
 
 Explore the results in the hosted dashboard or [run the dashboard locally](#view-the-dashboard-locally).
 
@@ -10,7 +10,7 @@ Explore the results in the hosted dashboard or [run the dashboard locally](#view
 
 | To explore… | Open |
 | --- | --- |
-| Individual predictions, scores, errors, and generation times | [Dashboard source](docs/) or the results dashboard above |
+| Individual predictions, scores, errors, and generation times | [Dashboard guide](docs/README.md) and [dashboard source](docs/) |
 | Natural-language intents and human reference facts | [Intent dataset](dataset/); [example intent](dataset/context1/intentA.txt) and [reference facts](dataset/context1/facts.pl) |
 | Available virtual network functions | [VNF catalogue](dataset/catalogoVNF.json) |
 | Run-level results and error records | [run_table.parquet](data/run_table.parquet) and [error_table.parquet](data/error_table.parquet) |
@@ -30,7 +30,7 @@ The dataset contains **34 scenarios**, each expressed in three ways: **102 inten
 
 The formulations change information order while preserving the intended facts. Scenario identifiers link equivalent variants; the 102 formulations are not 102 independent scenarios.
 
-The dashboard provides three views: **Run Explorer** for an individual translation, **Aggregate** for grouped results, and **Compare Techniques** for comparisons across settings. Filters select model, technique, scenario, and formulation. The URL hash retains the current selection for sharing. Reported execution times measure **model generation only**, excluding DIPS processing.
+The dashboard provides three views: **Run Explorer** for an individual translation, **Aggregate** for grouped results, and **Compare Techniques** for comparisons across settings. Filters select model, technique, scenario, and formulation. The URL hash retains the current selection for sharing. The appearance selector offers Light, Dark, and System modes and remembers the selection in the browser. Reported execution times measure **model generation only**, excluding DIPS processing.
 
 The Parquet files are the source tables. `docs/data.js` is their browser-ready export; it omits the large DIPS execution trace while retaining the fields used by the dashboard.
 

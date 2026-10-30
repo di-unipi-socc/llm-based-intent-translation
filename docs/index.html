@@ -5,29 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LLM-based Intent Translation</title>
   <meta name="description" content="Interactive explorer for LLM intent-to-Prolog translation runs: generated vs expected output, metrics, DIPS outcome and error catalogue per model, technique, context and schema." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="bg-glow" aria-hidden="true"></div>
-
   <header class="app-header">
-    <div class="brand">
-      <div class="brand-logo" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none"><path d="M6 22 L16 6 L26 22" stroke="url(#g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="24" r="3" fill="url(#g)"/><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs></svg>
-      </div>
-      <div>
+    <div class="header-top">
+      <div class="brand">
+        <p class="eyebrow">Research results / Intent translation</p>
         <h1>Neuro-Symbolic Network Intent Translation with Large Language Models</h1>
-        <p class="subtitle">Intent → Prolog translation · runs, metrics, DIPS outcome & errors</p>
+        <p class="subtitle">Explore translations, evaluation metrics, placement outcomes, and errors.</p>
       </div>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Theme: System. Switch to Light." title="Theme: System. Switch to Light.">
+        <svg data-theme-icon="light" hidden viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+        <svg data-theme-icon="dark" hidden viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.4A8.4 8.4 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"/><path d="m17 2 .7 2.3L20 5l-2.3.7L17 8l-.7-2.3L14 5l2.3-.7ZM21 9v4m-2-2h4"/></svg>
+        <svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+      </button>
     </div>
     <nav class="tabs" role="tablist" aria-label="Views">
       <button id="tab-run" class="tab active" role="tab" aria-selected="true" data-view="run">Run Explorer</button>
       <button id="tab-agg" class="tab" role="tab" aria-selected="false" data-view="agg">Aggregate</button>
       <button id="tab-compare" class="tab" role="tab" aria-selected="false" data-view="compare">Compare Techniques</button>
-      <span class="tab-indicator" aria-hidden="true"></span>
     </nav>
   </header>
 
