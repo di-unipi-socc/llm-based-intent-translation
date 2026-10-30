@@ -35,3 +35,6 @@ cache/
 .cache/
 
 
+
+# Local code index
+.codegraph/

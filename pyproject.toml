@@ -1,0 +1,31 @@
+[project]
+name = "llm-based-intent-translation"
+version = "0.1.0"
+description = "Dataset and analysis tools for LLM-based network intent translation"
+requires-python = ">=3.11,<3.13"
+dependencies = ["pandas>=2.2,<3", "pyarrow>=18,<27"]
+
+[dependency-groups]
+cloud = ["google-generativeai>=0.8,<0.9", "google-api-core>=2.19,<3"]
+
+# The existing SFTTrainer calls require the legacy tokenizer/dataset_text_field API.
+# CUDA experiments target Linux x86_64; analysis and cloud tools also work on macOS.
+
+local = [
+    "torch==2.6.0; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "torchvision==0.21.0; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "transformers==4.51.3; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "datasets==3.4.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "trl==0.11.4; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "unsloth==2025.6.12; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "unsloth-zoo==2025.7.11; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "accelerate==1.4.0; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "peft==0.14.0; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "bitsandbytes==0.45.3; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "xformers==0.0.29.post3; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "diffusers==0.32.2; sys_platform == 'linux' and platform_machine == 'x86_64'",
+    "huggingface-hub>=0.34,<0.35; sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,217 @@
+================================================================================
+                 ERROR CATALOG AND DESCRIPTIONS (IBN - DIPS)
+================================================================================
+Project: Network intent translation into Prolog facts for DIPS
+Reference implementation: scripts/error_catalog.py (from the repository root)
+Fact extraction and normalization: scripts/fact_metrics.py
+Last severity-criteria update: October 2026
+
+--------------------------------------------------------------------------------
+1. OVERVIEW AND CLASSIFICATION LOGIC
+--------------------------------------------------------------------------------
+The catalog classifies differences between an LLM prediction and the gold
+standard (the human reference facts for an intent) into four categories
+(A, B, C, D), each with specific subtypes.
+
+Each error has a SEVERITY level:
+- HIGH: Differences that change or compromise the network intent, including
+        unmet requirements, hallucinations, omissions, and parsing errors.
+- LOW:  Differences classified as stricter constraints than the gold reference,
+        such as lower latency, higher bandwidth, or hard instead of soft.
+
+Parameter positions below use ZERO-BASED indexing. For propertyExpectation,
+the classifier removes the first two identifiers (PropertyID and IntentID)
+before comparing arguments. A nine-argument property therefore has seven
+normalized arguments; a six-argument property has four.
+
+================================================================================
+2. ERROR CATEGORIES AND SUBTYPES
+================================================================================
+
+--------------------------------------------------------------------------------
+CATEGORY A: SYNTAX (A. SYNTAX)
+--------------------------------------------------------------------------------
+Structural errors in generated Prolog text are detected on the raw prediction,
+before normalized fact comparison. All category A errors have HIGH severity.
+The checks detect the cases listed below; they are not a complete Prolog parser.
+
+  * Subtype: A.SYNTAX
+    - Severity: High
+    - Triggers:
+      1. Missing final dot:
+         Each Prolog fact or clause must end with a dot '.'.
+         Example: `vnf(firewall, edge, 1)` instead of
+         `vnf(firewall, edge, 1).`
+
+      2. Unbalanced round parentheses:
+         Different numbers of opening '(' and closing ')' parentheses.
+         Example: `intent(i1, opA, 10, t1..`
+
+      3. Unbalanced square brackets:
+         Missing opening or closing brackets in lists, such as the VNF chain
+         in target/2.
+         Example: `target(t1, [vnf1, vnf2).`
+
+      4. Arity mismatch (incorrect number of predicate arguments):
+         - intent/4: exactly four arguments
+           (IntentID, ProviderOp, NumUsers, TargetID).
+         - target/2: exactly two arguments (TargetID, [VNFList]).
+         - vnf/3: exactly three arguments (VnfID, Edge/Cloud, HW).
+         - vnfXUser/4: exactly four arguments (VnfID, l, Range, HW).
+         - propertyExpectation: exactly six arguments for changing properties
+           or nine for non-changing properties. Other arities are errors.
+
+  * Subtype: A.FILE_NOT_FOUND
+    - Severity: High
+    - The prediction file is missing or cannot be found at the expected path.
+
+--------------------------------------------------------------------------------
+CATEGORY B: WRONG VALUES (B. WRONG VALUES)
+--------------------------------------------------------------------------------
+Differences in literal, scalar, or quantitative parameter values, rather than
+the VNF entities or topology represented by a fact.
+
+  * Subtype: B.TYPE_MISMATCH
+    - Severity: High
+    - Description:
+      The property type in propertyExpectation differs from the gold reference.
+      Examples: `security` instead of `compression`, or `delay` instead of
+      `latency`. This changes the kind of requirement being represented.
+
+  * Subtype: B.HARD_SOFT_MISMATCH
+    - Description:
+      A mismatch between a mandatory ('hard') and preferred ('soft') constraint
+      at normalized position 2 of a non-changing property (raw position 4).
+    - Severity:
+      - LOW:  The LLM generates 'hard' while the gold reference specifies 'soft'.
+              Requiring a preferred constraint makes the request stricter.
+      - HIGH: The LLM generates 'soft' while the gold reference specifies 'hard'.
+              Making a mandatory requirement optional can permit its violation.
+
+  * Subtype: B.VALUE_UNIT_MISMATCH
+    - Description:
+      A mismatch in a numerical value, unit, operator, or other scalar argument.
+      This includes:
+      - Normalized positions 1, 2, 3, 4 of a non-changing property:
+        operator, hard/soft level, value, and unit.
+      - Normalized position 1 of a changing property: the '_' placeholder
+        (raw position 3).
+      - ProviderOp and NumUsers in intent/4.
+    - Severity:
+      - LOW (stricter numerical latency or bandwidth values):
+        1. Latency: LLM value < gold value, for example 50 ms instead of 70 ms.
+           With the intended upper-bound requirement, this requests lower latency.
+        2. Bandwidth: LLM value > gold value, for example 100 Mbps instead of
+           50 Mbps. With the intended lower-bound requirement, this requests
+           more bandwidth.
+        The implementation applies these numerical exceptions by property type;
+        it classifies differing operators and units separately.
+      - HIGH: Other mismatches, including:
+        - Higher latency, for example 90 ms instead of 70 ms.
+        - Lower bandwidth, for example 30 Mbps instead of 50 Mbps.
+        - Incorrect units, for example 's' instead of 'ms'.
+        - Reversed comparison operators, for example 'greater' instead of 'lower'.
+        - Non-numerical or non-comparable values.
+
+--------------------------------------------------------------------------------
+CATEGORY C: WRONG VNFs AND TOPOLOGY (C. WRONG VNFs)
+--------------------------------------------------------------------------------
+Errors involving VNF identity, edge/cloud assignment, hardware requirements,
+or topological relationships in the service chain.
+
+  * Subtype: C.TOPOLOGY_ERROR
+    - Severity: High
+    - Description:
+      - An incorrect or hallucinated VNF in a source or destination argument
+        of propertyExpectation.
+      - An incorrect VNF name or identifier in vnf/3 or vnfXUser/4.
+
+  * Subtype: C.SOURCE_DEST_SWAP
+    - Severity: High
+    - Description:
+      Source and destination are reversed in a CHANGING property with six
+      arguments: security, compression, logging, privacy, caching, decoding,
+      or encoding. The position of these operations in the chain is directional;
+      reversing the endpoints changes the intended operation order.
+    - SPECIAL CASE (nine-argument properties):
+      The current classifier accepts a pure source/destination swap for
+      nine-argument properties without reporting an error. This is a convention
+      of the implemented comparison, including latency, bandwidth, and affinity
+      properties; it is not a general claim that all network links are symmetric.
+
+  * Subtype: C.WRONG_TARGET_CHAIN
+    - Severity: High
+    - Description:
+      The ordered VNF list in target(TargetID, [VNFList]) differs from the gold
+      reference. This includes an incorrect service-function-chain order or
+      an omitted or added VNF.
+
+  * Subtype: C.WRONG_ASSIGNMENT
+    - Severity: High
+    - Description:
+      Incorrect VNF deployment attributes:
+      - Edge/cloud assignment at position 1 of vnf/3.
+      - Hardware requirements at position 2 of vnf/3 or position 3 of vnfXUser/4.
+      - Other scaling or user-range parameters in vnfXUser/4.
+
+--------------------------------------------------------------------------------
+CATEGORY D: INSERTIONS AND REMOVALS (D. INSERTIONS/REMOVALS)
+--------------------------------------------------------------------------------
+Facts left without a corresponding match between the generated and gold fact
+sets after pairing facts by predicate and argument similarity.
+
+  * Subtype: D.INSERTION (False Positive)
+    - Severity: High
+    - Description:
+      An extra generated Prolog fact without a corresponding gold fact.
+      It introduces an unrequested constraint, VNF, or property expectation.
+
+  * Subtype: D.REMOVAL (False Negative)
+    - Severity: High
+    - Description:
+      A gold fact omitted from the generated specification. The prediction
+      fails to express a required latency bound, security operation, VNF,
+      or another part of the reference intent.
+
+================================================================================
+3. ERROR-TYPE SUMMARY
+================================================================================
+
+Category / subtype         Scope                      Severity / condition
+--------------------------------------------------------------------------------
+A.SYNTAX                   Raw Prolog text            High: missing dots,
+                                                      unbalanced delimiters,
+                                                      or incorrect arity.
+A.FILE_NOT_FOUND           Prediction file            High: file not found.
+
+B.TYPE_MISMATCH            Property type              High: type differs.
+B.HARD_SOFT_MISMATCH       Non-changing property      Low: hard instead of soft.
+                                                      High: soft instead of hard.
+B.VALUE_UNIT_MISMATCH      Property value             Low: lower latency or
+                                                      higher bandwidth.
+                                                      High: other differences.
+B.VALUE_UNIT_MISMATCH      intent/4                   High: ProviderOp or
+                                                      NumUsers differs.
+
+C.TOPOLOGY_ERROR           Property endpoints, VNFs   High: incorrect VNF.
+C.SOURCE_DEST_SWAP         Changing property          High: reversed endpoints.
+                           Non-changing property     A pure swap is accepted.
+C.WRONG_TARGET_CHAIN      target/2                   High: chain differs.
+C.WRONG_ASSIGNMENT        vnf/3, vnfXUser/4           High: deployment, hardware,
+                                                      or user parameters differ.
+
+D.INSERTION                Unmatched generated fact  High: false positive.
+D.REMOVAL                  Unmatched gold fact       High: false negative.
+
+================================================================================
+4. FILES WITH ONLY LOW-SEVERITY ERRORS
+================================================================================
+The per-model reports generated by scripts/error_catalog.py include the section
+"FILES WITH ONLY LOW ERRORS".
+
+These predictions have no HIGH-severity errors under the implemented classifier.
+Their detected differences request stricter numerical constraints or use hard
+instead of soft. This classification describes translation differences; it does
+not establish placement feasibility or full logical equivalence. DIPS execution
+and placement results are assessed separately.
+================================================================================

@@ -1,132 +1,114 @@
-# LLM Intent-to-Prolog Translation for DIPS
+# LLM-based Intent Translation
 
-Experimental framework for the automatic translation of network intents expressed in natural language into formal Prolog logic facts compatible with the **DIPS** (Declarative Intent Processing System) framework.
+Companion repository containing the dataset, experiment scripts, and results for translating natural-language network intents into Prolog facts for [DIPS](dips/README.md). Experiments compare Qwen2.5 models (3B, 7B, and 14B) and Gemini using zero-shot and few-shot prompting, plus LoRA adaptation for Qwen2.5.
 
-The repository implements and compares two adaptation strategies for language models in data-scarce scenarios:
-- **In-Context Learning (ICL):** Evaluation in *0-shot*, *3-shot*, and *9-shot* configurations.
-- **Parameter-Efficient Fine-Tuning (PEFT via LoRA):** Training with *5-Fold Cross-Validation* partitioned at the semantic context level to prevent data leakage.
+**[Results dashboard](https://di-unipi-socc.github.io/llm-based-intent-translation/)** · [Dataset](dataset/) · [Result tables](data/) · [Prompt templates](references/prompts.txt)
 
-## Repository Structure
+Explore the results in the hosted dashboard or [run the dashboard locally](#view-the-dashboard-locally).
 
-```text
-IBN github/
-├── CloudModel/                                 # Gemini 3.5 flash Model (Cloud)
-│   ├── prompt_fewShot/                         # In-Context Learning evaluation 3-shot and 9-shot
-│   └── prompt_zeroShot/                        # In-Context Learning evaluation 0-shot
-├── dips/                                       # DIPS source files and formal rules (Prolog)
-├── intent/                                     # Intent dataset in 3 different formats
-├── LocalModel/
-│   ├── Qwen2.5-inContext/
-│   │   ├── zeroShot/                           # Qwen ICL 0-shot scripts (3B, 7B, 14B)
-│   │   ├── 3-Shot/                             # Qwen ICL 3-shot scripts (3B, 7B, 14B)
-│   │   └── 9-Shot/                             # Qwen ICL 9-shot scripts (3B, 7B, 14B)
-│   └── Qwen2.5-LoRa/
-│       ├── 5-fold-Qwen2.5-3B/                  # 5-Fold experiments for Qwen 3B
-│       ├── 5-fold-Qwen2.5-7B/                  # 5-Fold experiments for Qwen 7B
-│       ├── 5-fold-Qwen2.5-14B/                 # 5-Fold experiments for Qwen 14B
-│       ├── esegui_creazione_dataset_json.py    # Preparation of partitioned dataset for folds
-│       ├── esegui_pipeline.py                  # Complete LoRA training and inference pipeline
-│       └── esegui_valutazione.py               # Calculation of global and per-fold metrics
-├── script/
-│   ├── DipsExecuter.py                         # DIPS query execution
-│   ├── MetricExecuterInputDips.py              # Metrics calculation on Prolog syntax (F1, Recall, Exact Match)
-│   ├── catalogo_errori.py                      # Taxonomy and tracking of syntactic/logic errors
-│   └── parser_catalogo.py                      # Parsing of test intents
-├── prompts.txt                                 # Definitions of prompt templates (LoRA and ICL)
-└── README.md
+## Start here
+
+| To explore… | Open |
+| --- | --- |
+| Individual predictions, scores, errors, and generation times | [Dashboard source](docs/) or the results dashboard above |
+| Natural-language intents and human reference facts | [Intent dataset](dataset/); [example intent](dataset/context1/intentA.txt) and [reference facts](dataset/context1/facts.pl) |
+| Available virtual network functions | [VNF catalogue](dataset/catalogoVNF.json) |
+| Run-level results and error records | [run_table.parquet](data/run_table.parquet) and [error_table.parquet](data/error_table.parquet) |
+| Prompts and error categories | [prompts.txt](references/prompts.txt) and [error_description.txt](references/error_description.txt) |
+| Local-model prompting experiments | [Qwen2.5 in-context learning](experiments/local/in_context/) |
+| Local-model training and evaluation | [Qwen2.5 LoRA](experiments/local/lora/) |
+| Cloud-model experiments | [Gemini scripts](experiments/cloud/) |
+| Fact comparison and DIPS execution | [Evaluation scripts](scripts/) and [DIPS](dips/) |
+
+## Dataset and results
+
+The dataset contains **34 scenarios**, each expressed in three ways: **102 intent formulations** in total. Each `dataset/contextN/` directory contains `intentA.txt`, `intentB.txt`, `intentC.txt`, and a shared `facts.pl` reference specification.
+
+- **A:** the complete service chain precedes its properties.
+- **B:** each chain fragment is followed by its properties.
+- **C:** properties precede the chain fragment to which they apply.
+
+The formulations change information order while preserving the intended facts. Scenario identifiers link equivalent variants; the 102 formulations are not 102 independent scenarios.
+
+The dashboard provides three views: **Run Explorer** for an individual translation, **Aggregate** for grouped results, and **Compare Techniques** for comparisons across settings. Filters select model, technique, scenario, and formulation. The URL hash retains the current selection for sharing. Reported execution times measure **model generation only**, excluding DIPS processing.
+
+The Parquet files are the source tables. `docs/data.js` is their browser-ready export; it omits the large DIPS execution trace while retaining the fields used by the dashboard.
+
+## View the dashboard locally
+
+From the repository root, with Python installed:
+
+```bash
+python3 -m http.server 8000
 ```
 
+Open <http://localhost:8000/docs/>. Browsing the checked-in dashboard requires no model downloads, GPU, or Python packages.
 
+After changing either Parquet table, regenerate the browser data:
 
-## System Requirements and Dependencies
+```bash
+make install
+make data
+```
 
-**Hardware & System**
-* **Operating System:** Linux
-* **GPU:** NVIDIA with CUDA support (compute capability adequate for 3B–14B models)
-* **Drivers & Toolkit:** NVIDIA CUDA Toolkit (v12.4 recommended)
-* **Storage:** Sufficient disk space for model weights and Hugging Face cache (`HF_HOME`)
+## Dashboard publication
 
-**Network & Logic Software**
-* **SWI-Prolog (`swipl`):** Required for executing the DIPS framework and validating generated Prolog facts
+The [results dashboard](https://di-unipi-socc.github.io/llm-based-intent-translation/) is hosted on GitHub Pages from `docs/`. Its HTML, CSS, JavaScript, and exported data are served as static files.
 
-**Core Python Libraries**
-* **Python:** 3.10+
-* **PyTorch (`torch`, `torchvision`, `torchaudio`):** Compiled with CUDA support
-* **Unsloth:** Acceleration and memory optimization framework for PEFT/LoRA
-* **Transformers, Datasets & Accelerate:** Hugging Face model management and training pipelines
-* **google-genai:** API interfacing for tests on cloud models (Gemini)
+To update the dashboard after modifying the Parquet tables, run `make data` and commit the resulting `docs/data.js` with the source tables. Changes pushed to `docs/` are published automatically; publication does not regenerate data.
 
+## DIPS dependency
 
+The `dips/` directory contains the DIPS sources and the benchmark configuration. Compared with upstream commit `dc0620d5aca0cc0c7f657c9fc32299590219475c`, `dips.pl` selects the added `data/infrastructures/InfrTestingIntent.pl`; `data/services/all.pl` disables two example service imports and adds `authVF`. The batch executor uses this directory directly.
 
+Use `make data` to regenerate browser data and `make serve` to preview the published site at <http://localhost:8000/>.
 
+## Experiment code
 
+```text
+dataset/                        # Scenarios, formulations, reference facts, VNF catalogue
+data/                           # Run and error tables
+docs/                           # Static dashboard published by GitHub Pages
+experiments/
+  cloud/                        # Gemini prompting and evaluation
+  local/
+    in_context/                 # 0-, 3-, and 9-shot experiments, across model sizes
+    lora/                       # Five-fold training, inference, and evaluation
+scripts/                        # Shared metrics, error analysis, DIPS execution, and data export
+dips/                           # Prolog rules and DIPS documentation
+references/                     # Prompt templates and error taxonomy
+```
 
-### Main Scripts Description
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run from the repository root:
 
-*   **`esegui_pipeline.py`**
-    This is the main orchestration script, designed to automate the batch execution of tests on all dimensional variants of the local model (3B, 7B, and 14B). Its behavior dynamically adapts based on the directory in which it is executed:
-    *   **In LoRA environment:** Automatically manages the entire execution queue, sequentially starting the training and subsequent inference for all 5 folds, repeating the process for the 3B, 7B, and 14B models.
-    *   **In In-Context environment:** Sequentially executes inference tests for the three models (3B, 7B, 14B), applying all the various prompt sets (0-shot, 3-shot, 9-shot) to the entire test dataset.
+```bash
+make install
+```
 
-*   **`esegui_valutazione.py`**
-    This script is responsible for performance analysis and metrics calculation. It compares the Prolog facts generated by the models (saved within the results folders) with the expected *ground truth* present in the original intent dataset. The calculation of the metrics (F1-Score, Global Accuracy/Exact Match, Precision, Recall, and Jaccard Index) occurs recursively: in the case of LoRA, the script automatically traverses all folds, analyzing the single iterations. Upon completion of the execution, it generates and saves detailed text reports for each model and configuration analyzed.
+This runs `uv sync --locked --all-groups`. The root `pyproject.toml` declares analysis/export dependencies (`pandas`, `pyarrow`), a `cloud` group (`google-generativeai`, `google-api-core`), and a `local` group for training and inference (`torch`, `torchvision`, `transformers`, `datasets`, `trl`, `unsloth`, and their supporting libraries).
 
-*   **`esegui_creazione_dataset_json.py`**
-    This script generates the structured JSON files that will be provided as input to the models for both the training phase (Train) and the inference tests.
-    It is fundamental if you decide to expand or modify the original dataset: by executing the script, all the necessary partitions are regenerated. The project also includes a master file that, leveraging `os.walk`, locates and cascades the execution of all dataset creation scripts present in the various subdirectories.
-    * **Configuration note:** The partitioning rules (such as the total number of contexts or the range assigned to each fold) are defined directly within the code. Should you add new elements to the dataset (beyond the current 34 contexts), you will need to manually update these variables within the script before running it.
+Python 3.11 or 3.12 is required. Local-model dependencies are installed only on Linux x86_64; these experiments require an NVIDIA GPU and a driver compatible with the locked PyTorch 2.6 / CUDA 12.4 stack. On macOS and other platforms, `make install` installs analysis and cloud dependencies; CUDA training is unavailable. The local stack is pinned for compatibility with the scripts' `SFTTrainer` API. The lockfile specifies the software environment for running these scripts; the exact environment used to produce the stored results was not recorded. To install only dashboard/export dependencies, use `uv sync --locked`.
 
-*   **`catalogo_errori.py`**
-    This script handles the qualitative analysis of the results. It should be executed after inference and the calculation of the general metrics. By automatically traversing all the results directories, it performs an advanced parsing of the generated Prolog facts to identify the exact nature of the errors committed by the models. Upon completion, it generates a folder containing detailed diagnostic reports.
-    To provide a precise taxonomy, errors are classified into four macro-categories (the latter three of which are further divided into specific sub-categories):
-    *   **Syntax:** Formatting errors that prevent Prolog compilation.
-    *   **Wrong values:** Incorrect assignment of parameters, attributes (e.g., `hard`/`soft`), or topologies (`Before`/`After`).
-    *   **Wrong VNFs:** Hallucination of non-existent Network Functions or swapping of valid nodes.
-    *   **Insertions and Removals:** Prolog facts added in excess (not requested) or missing compared to the *ground truth*.
+SWI-Prolog (`swipl`) is a separate system dependency required for DIPS; uv does not install it. Gemini scripts read the `GEMINI_API_KEY` environment variable. Run scripts through the project environment (for example `uv run --locked --group cloud python experiments/cloud/prompt_zeroShot/run_gemini.py`), or activate `.venv` before using `python`. Local-model commands below require the supported GPU host and access to the model weights.
 
-*   **`DipsExecuter.py`**
-    This script acts as a direct interface between the predictions generated by the language models and the DIPS logical framework. It automates the traversal of the entire project to locate all generated result files, strictly adhering to the subdirectory hierarchy, and subjects them to direct execution in DIPS. This step is crucial to validate in the field whether the generated Prolog code (even if syntactically correct and free of typos) is actually accepted, processed, and validated by the receiving network framework.
+Default input, output, and checkpoint paths are resolved relative to each script. Run the experiment entry points from the repository root:
 
+```bash
+# Qwen2.5 prompting experiments
+uv run --locked --group local python experiments/local/in_context/run_all_pipelines.py
+```
 
-### Dataset Schema
+```bash
+# Qwen2.5 LoRA training and inference
+uv run --locked --group local python experiments/local/lora/run_all_pipelines.py
+```
 
-The proprietary dataset used for this experiment was built to evaluate the models' abstraction capability. It consists of a core of **34 original network contexts**, each expanded into three structural variants (for a total of 102 samples):
+These commands start model experiments and may require substantial GPU time and model downloads. For analysis of existing results, use the dashboard or Parquet tables instead. Cloud experiment entry points are under [prompt_zeroShot](experiments/cloud/prompt_zeroShot/) and [prompt_fewShot](experiments/cloud/prompt_fewShot/). Shared evaluation tools include [fact metrics](scripts/fact_metrics.py), [error analysis](scripts/error_catalog.py), and [DIPS execution](scripts/dips_executor.py).
 
-- **Schema A:** Procedural Structure
-- **Schema B:** Fragmented Structure prioritizing VNFs
-- **Schema C:** Fragmented Structure prioritizing Property Expectations
+## Project context
 
-To ensure scientific validity (avoiding *data leakage*), the **5-Fold Cross-Validation** in LoRA training does not separate single sentences but isolates entire semantic contexts. In this way, during the test phase, the model always faces topologies and VNF chains never seen during training.
+The original experimental framework was developed by **Niccolò Baicchi** as thesis work at the **University of Pisa**. DIPS processes declarative network intents expressed as Prolog facts.
 
+## Data compatibility
 
-## Quick Start (Execution Pipeline)
-
-The environment and datasets are already pre-configured. The execution flow is standardized and is identical for both strategies analyzed in the project (In-Context Learning and LoRA).
-
-To reproduce the tests, follow these simple steps:
-
-1. **Navigate to the desired test folder:** Position yourself within the directory of the strategy you intend to execute (inside `LocalModel`).
-   ```bash
-   # Example: Enter the In-Context Learning folder
-   cd LocalModel/Qwen2.5-inContext/
-   
-   # OR in the LoRA folder
-   # cd LocalModel/Qwen2.5-LoRa/
-   ```
-2. **Execute the main pipeline:** Run the orchestration script to start the tests in sequence.
-   ```bash
-   python esegui_all_pipeline.py
-   ```
-3. **Run the evaluation tool:** Once inference is complete, run the evaluation script to analyze the results.
-   ```bash
-   python esegui_valutazione.py
-   ```
-
-
-## Project Context and Author
-
-This project was developed as part of a Thesis work at the **University of Pisa**.
-The intents generated by this pipeline are specifically designed to feed **DIPS**, a framework based on declarative logic (Prolog) for modeling, translating, and resolving network intent conflicts.
-
-- **Author:** Niccolò Baicchi
-- **Institution:** University of Pisa
+Stored datasets, results, scenario identifiers, and prompt templates are preserved in their recorded form. Timing records retain their original filenames and JSON keys, including `tempi_esecuzione.json`, `durata_secondi`, and timestamp fields. The evaluation scripts read this format directly.

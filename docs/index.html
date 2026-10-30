@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM-based Intent Translation</title>
+  <meta name="description" content="Interactive explorer for LLM intent-to-Prolog translation runs: generated vs expected output, metrics, DIPS outcome and error catalogue per model, technique, context and schema." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M6 22 L16 6 L26 22" stroke="url(#g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="24" r="3" fill="url(#g)"/><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs></svg>
+      </div>
+      <div>
+        <h1>Neuro-Symbolic Network Intent Translation with Large Language Models</h1>
+        <p class="subtitle">Intent → Prolog translation · runs, metrics, DIPS outcome & errors</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Views">
+      <button id="tab-run" class="tab active" role="tab" aria-selected="true" data-view="run">Run Explorer</button>
+      <button id="tab-agg" class="tab" role="tab" aria-selected="false" data-view="agg">Aggregate</button>
+      <button id="tab-compare" class="tab" role="tab" aria-selected="false" data-view="compare">Compare Techniques</button>
+      <span class="tab-indicator" aria-hidden="true"></span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- ================= CONTROLS ================= -->
+    <section class="panel controls" aria-label="Selection">
+      <div class="control-row">
+        <div class="control" id="ctrl-technique">
+          <span class="control-label">Technique</span>
+          <div class="segmented" id="seg-technique" role="radiogroup" aria-label="Technique"></div>
+        </div>
+        <div class="control" id="ctrl-model">
+          <span class="control-label">Model</span>
+          <div class="segmented" id="seg-model" role="radiogroup" aria-label="Model"></div>
+        </div>
+      </div>
+
+      <div class="control-row run-only">
+        <div class="control grow">
+          <span class="control-label">Context <span class="hint">(← → keys)</span></span>
+          <div class="context-picker">
+            <button class="icon-btn" id="ctx-prev" aria-label="Previous context">‹</button>
+            <div class="context-grid" id="ctx-grid" role="radiogroup" aria-label="Context"></div>
+            <button class="icon-btn" id="ctx-next" aria-label="Next context">›</button>
+          </div>
+        </div>
+        <div class="control">
+          <span class="control-label">Schema</span>
+          <div class="segmented" id="seg-schema" role="radiogroup" aria-label="Schema"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= RUN VIEW ================= -->
+    <section id="view-run" class="view active" aria-live="polite"></section>
+
+    <!-- ================= AGGREGATE VIEW ================= -->
+    <section id="view-agg" class="view" aria-live="polite"></section>
+
+    <!-- ================= COMPARE VIEW ================= -->
+    <section id="view-compare" class="view" aria-live="polite"></section>
+  </main>
+
+  <footer class="app-footer">
+    <a href="https://github.com/di-unipi-socc/llm-based-intent-translation">Repository</a> · <a href="https://github.com/di-unipi-socc/llm-based-intent-translation/tree/main/dataset">Dataset</a> · <a href="https://github.com/di-unipi-socc/llm-based-intent-translation/tree/main/data">Source tables</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
