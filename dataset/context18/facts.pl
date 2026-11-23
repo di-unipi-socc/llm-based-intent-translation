@@ -1,7 +1,7 @@
 intent(smartParkingIntent, smartParkOp, 100000, smartParkingBackend).
 
-propertyExpectation(affReq, smartParkingIntent, affinity, dedicated, hard, _, _, paymentProcessorVF, _).
-propertyExpectation(affReq, smartParkingIntent, affinity, dedicated, hard, _, _, mapUpdaterVF, _).
+propertyExpectation(affReq1, smartParkingIntent, affinity, dedicated, hard, _, _, paymentProcessorVF, _).
+propertyExpectation(affReq2, smartParkingIntent, affinity, dedicated, hard, _, _, mapUpdaterVF, _).
 propertyExpectation(latReq, smartParkingIntent, latency, lower, hard, 100, ms, sensorDataCollectorVF, securityEnforcerVF).
 
 propertyExpectation(compReq, smartParkingIntent, compression, _, sensorDataCollectorVF, _).

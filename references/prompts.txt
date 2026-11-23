@@ -132,8 +132,8 @@ The healthcare provider medDiagnosticOp requires a radiology AI diagnostics serv
 OUTPUT:
 intent(radiologyAIIntent, medDiagnosticOp, 10000, radiologyPipelineService).
 
-propertyExpectation(affReq, radiologyAIIntent, affinity, dedicated, hard, _, _, lesionAnalyzerVF, _).
-propertyExpectation(affReq, radiologyAIIntent, affinity, dedicated, hard, _, _, metadataExtractorVF, _).
+propertyExpectation(affReq1, radiologyAIIntent, affinity, dedicated, hard, _, _, lesionAnalyzerVF, _).
+propertyExpectation(affReq2, radiologyAIIntent, affinity, dedicated, hard, _, _, metadataExtractorVF, _).
 propertyExpectation(bwReq, radiologyAIIntent, bandwidth, greater, hard, 500, megabps, dicomIngesterVF, lesionAnalyzerVF).
 
 propertyExpectation(compReq, radiologyAIIntent, compression, _, dicomIngesterVF, _).
@@ -184,8 +184,8 @@ The municipal provider smartParkOp requires a parking management backend to hand
 OUTPUT:
 intent(smartParkingIntent, smartParkOp, 100000, smartParkingBackend).
 
-propertyExpectation(affReq, smartParkingIntent, affinity, dedicated, hard, _, _, paymentProcessorVF, _).
-propertyExpectation(affReq, smartParkingIntent, affinity, dedicated, hard, _, _, mapUpdaterVF, _).
+propertyExpectation(affReq1, smartParkingIntent, affinity, dedicated, hard, _, _, paymentProcessorVF, _).
+propertyExpectation(affReq2, smartParkingIntent, affinity, dedicated, hard, _, _, mapUpdaterVF, _).
 propertyExpectation(latReq, smartParkingIntent, latency, lower, hard, 30, ms, sensorDataCollectorVF, securityEnforcerVF).
 
 propertyExpectation(compReq, smartParkingIntent, compression, _, sensorDataCollectorVF, _).
@@ -253,8 +253,8 @@ intent(arBackendIntent, factoryCloudOp, 500, arRenderingService).
 propertyExpectation(latReq, arBackendIntent, latency, lower, hard, 12, ms, arStreamReceiverVF, arStreamDispatcherVF).
 propertyExpectation(bwReq, arBackendIntent, bandwidth, greater, hard, 200, megabps, arStreamReceiverVF, arPoseEstimatorVF).
 propertyExpectation(hwReq, arBackendIntent, totChainHW, lower, soft, 90, gb, _, _).
-propertyExpectation(affReq, arBackendIntent, affinity, dedicated, hard, _, _, arPoseEstimatorVF, _).
-propertyExpectation(affReq, arBackendIntent, affinity, dedicated, hard, _, _, dataOverlayEngineVF, _).
+propertyExpectation(affReq1, arBackendIntent, affinity, dedicated, hard, _, _, arPoseEstimatorVF, _).
+propertyExpectation(affReq2, arBackendIntent, affinity, dedicated, hard, _, _, dataOverlayEngineVF, _).
 
 target(arRenderingService, [arStreamReceiverVF, arPoseEstimatorVF, dataOverlayEngineVF, arStreamDispatcherVF]).
 

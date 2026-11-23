@@ -112,8 +112,8 @@ The healthcare provider medDiagnosticOp requires a radiology AI diagnostics serv
 OUTPUT:
 intent(radiologyAIIntent, medDiagnosticOp, 10000, radiologyPipelineService).
 
-propertyExpectation(affReq, radiologyAIIntent, affinity, dedicated, hard, _, _, lesionAnalyzerVF, _).
-propertyExpectation(affReq, radiologyAIIntent, affinity, dedicated, hard, _, _, metadataExtractorVF, _).
+propertyExpectation(affReq1, radiologyAIIntent, affinity, dedicated, hard, _, _, lesionAnalyzerVF, _).
+propertyExpectation(affReq2, radiologyAIIntent, affinity, dedicated, hard, _, _, metadataExtractorVF, _).
 propertyExpectation(bwReq, radiologyAIIntent, bandwidth, greater, hard, 500, megabps, dicomIngesterVF, lesionAnalyzerVF).
 
 propertyExpectation(compReq, radiologyAIIntent, compression, _, dicomIngesterVF, _).
