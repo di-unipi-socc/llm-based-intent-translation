@@ -58,7 +58,7 @@ SCHEMA DEFINITIONS:
 
 3. Non-Changing Properties (9 params):
    - propertyExpectation(PropID, IntentID, Type, Operator, hard/soft, Value, Unit, SourceVNF, DestVNF).
-   - Valid Types: bandwidth, latency, totChainHW, affinity. (Affinity Values: bound, dedicated, same).
+   - Valid Types: bandwidth, latency, totChainHW, affinity. (Affinity Operator: dedicated, same).
 
 4. Changing Properties (6 params):
    - propertyExpectation(PropID, IntentID, Type, _, Source, Destination).

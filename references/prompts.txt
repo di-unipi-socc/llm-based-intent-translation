@@ -21,9 +21,6 @@ The two training builders apply to single-range and two-range folds respectively
 See scripts/error_catalog.py and references/error_description.txt for error
 classification, and scripts/fact_metrics.py for fact normalization and metrics.
 
-Historical note: ICL example 8 pairs a digital-twin input with an AGV output.
-It is retained as recorded rather than corrected retrospectively.
-
 ================================================================================
 
 IN-CONTEXT LEARNING (ICL) PROMPT:
@@ -83,8 +80,8 @@ Generate the output using EXACTLY these formats. Do not add extra parameters. No
 3. Non-Changing Properties (Expects EXACTLY 9 parameters):
 - Template: propertyExpectation(PropID, IntentID, Type, Operator, hard/soft, Value, Unit, SourceVNF, DestVNF).
 - Valid Types: bandwidth, latency, totChainHW, affinity
-- Affinity Values: dedicated, same
-- Note: For affinity and totChainHW, use "_" for Operator, Value, Unit, Source, or Dest where not applicable.
+- Affinity Operator: dedicated, same
+- Note: For affinity and totChainHW, use "_" for Value, Unit, Source, or Dest where not applicable.
 
 4. Changing Properties (Expects EXACTLY 6 parameters):
 - Template: propertyExpectation(PropID, IntentID, Type, _, Source, Destination).
@@ -304,27 +301,25 @@ INPUT:
 The steelIndustryOp provider intends to deploy the digitalTwinService to manage 1500 users. The service manages a digital twin of a blast furnace and requires continuous synchronization of physical parameters (pressure, temperature) with the 3D model hosted in the cloud to simulate thermal efficiency in real time. The chain begins with <sensorIngestVF, 4> allocated at the edge and <dataFilteringVF, 6> allocated at the edge, mandating data compression immediately after <sensorIngestVF, 4>. Next, the flow continues to <thermalSimVF, 20> located in the cloud, where data decoding is strictly necessary before <thermalSimVF, 20> and a latency lower than 20 ms is mandatory between <sensorIngestVF, 4> and <thermalSimVF, 20>. Finally, the service finishes at <model3dVF, 25> located in the cloud. It is desired to keep total chain hardware consumption below 80 GB.
 
 OUTPUT:
-intent(agvRoutingIntent, agvFleetOp, 500, agvLogisticsBackend).
+intent(thermalTwinIntent, steelIndustryOp, 1500, digitalTwinService).
 
-propertyExpectation(latReq, agvRoutingIntent, latency, lower, hard, 15, ms, agvTelemetryCollectorVF, routeOptimizerVF).
-propertyExpectation(bwReq, agvRoutingIntent, bandwidth, greater, soft, 50, megabps, agvTelemetryCollectorVF, taskDispatcherVF).
-propertyExpectation(affReq, agvRoutingIntent, affinity, dedicated, hard, _, _, routeOptimizerVF, _).
+propertyExpectation(cp1, thermalTwinIntent, compression, _, sensorIngestVF, _).
+propertyExpectation(cp2, thermalTwinIntent, decoding, _, _, thermalSimVF).
 
-propertyExpectation(compReq, agvRoutingIntent, compression, _, agvTelemetryCollectorVF, _).
-propertyExpectation(secReq, agvRoutingIntent, security, _, _, routeOptimizerVF).
-propertyExpectation(logReq, agvRoutingIntent, logging, _, _, centralFleetSyncVF).
+propertyExpectation(lat1, thermalTwinIntent, latency, lower, hard, 20, ms, sensorIngestVF, thermalSimVF).
+propertyExpectation(hw1, thermalTwinIntent, totChainHW, lower, soft, 80, gb, _, _).
 
-target(agvLogisticsBackend, [agvTelemetryCollectorVF, routeOptimizerVF, taskDispatcherVF, centralFleetSyncVF]).
+target(digitalTwinService, [sensorIngestVF, dataFilteringVF, thermalSimVF, model3dVF]).
 
-vnf(agvTelemetryCollectorVF, edge, 6).
-vnf(routeOptimizerVF, cloud, 20).
-vnf(taskDispatcherVF, cloud, 16).
-vnf(centralFleetSyncVF, cloud, 12).
+vnf(sensorIngestVF, edge, 4).
+vnf(dataFilteringVF, edge, 6).
+vnf(thermalSimVF, cloud, 20).
+vnf(model3dVF, cloud, 25).
 
-vnfXUser(agvTelemetryCollectorVF, l, (1, 500), 6).
-vnfXUser(routeOptimizerVF, l, (1, 500), 20).
-vnfXUser(taskDispatcherVF, l, (1, 500), 16).
-vnfXUser(centralFleetSyncVF, l, (1, 500), 12).
+vnfXUser(sensorIngestVF, l, (1, 1500), 4).
+vnfXUser(dataFilteringVF, l, (1, 1500), 6).
+vnfXUser(thermalSimVF, l, (1, 1500), 20).
+vnfXUser(model3dVF, l, (1, 1500), 25).
 
 
 9)
@@ -403,7 +398,7 @@ SCHEMA DEFINITIONS:
 
 3. Non-Changing Properties (9 params):
    - propertyExpectation(PropID, IntentID, Type, Operator, hard/soft, Value, Unit, SourceVNF, DestVNF).
-   - Valid Types: bandwidth, latency, totChainHW, affinity. (Affinity Values: bound, dedicated, same).
+   - Valid Types: bandwidth, latency, totChainHW, affinity. (Affinity Operator: dedicated, same).
 
 4. Changing Properties (6 params):
    - propertyExpectation(PropID, IntentID, Type, _, Source, Destination).

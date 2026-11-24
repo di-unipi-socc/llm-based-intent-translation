@@ -65,8 +65,8 @@ Generate the output using EXACTLY these formats. Do not add extra parameters. No
 3. Non-Changing Properties (Expects EXACTLY 9 parameters):
 - Template: propertyExpectation(PropID, IntentID, Type, Operator, hard/soft, Value, Unit, SourceVNF, DestVNF).
 - Valid Types: bandwidth, latency, totChainHW, affinity
-- Affinity Values: dedicated, same
-- Note: For affinity and totChainHW, use "_" for Operator, Value, Unit, Source, or Dest where not applicable.
+- Affinity Operator: dedicated, same
+- Note: For affinity and totChainHW, use "_" for Value, Unit, Source, or Dest where not applicable.
 
 4. Changing Properties (Expects EXACTLY 6 parameters):
 - Template: propertyExpectation(PropID, IntentID, Type, _, Source, Destination).
