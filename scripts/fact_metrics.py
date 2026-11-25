@@ -23,7 +23,7 @@ def build_vnf_mapping(vnf_list):
 def _norm_property_expectation(args):
     """Removes Rule ID and Intent ID (first 2 parameters).
     
-    For 'affinity dedicated' properties, sorts the last two VNF parameters
+    For 'affinity same' properties, sorts the last two VNF parameters
     (SourceVNF, DestVNF) alphabetically because they are interchangeable.
     """
     parts = args.split(',')
@@ -31,11 +31,11 @@ def _norm_property_expectation(args):
         return args
     norm = parts[2:]
     # norm has 7 elements: Type, Operator, hard/soft, Value, Unit, SourceVNF, DestVNF
-    # If Type == 'affinity' and Value == 'dedicated', sort SourceVNF and DestVNF
+    # Only 'same' is symmetric; 'dedicated' identifies its VNF by source.
     if len(norm) == 7:
         property_type = norm[0].strip()
-        value = norm[3].strip()
-        if property_type == 'affinity' and value == 'dedicated':
+        operator = norm[1].strip()
+        if property_type == 'affinity' and operator == 'same':
             norm[-2], norm[-1] = sorted([norm[-2].strip(), norm[-1].strip()])
     return ",".join(norm)
 

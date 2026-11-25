@@ -20,7 +20,7 @@ DIPS_DIR = os.path.join(BASE_DIR, "dips")
 OUTPUT_BASE_DIR = os.path.join(SCRIPT_DIR, "dips_results")
 
 # Timeout in seconds for each Prolog execution
-TIMEOUT_SECONDS = 15
+TIMEOUT_SECONDS = 60
 
 
 # ==============================================================================
