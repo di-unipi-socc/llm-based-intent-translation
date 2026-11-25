@@ -318,7 +318,7 @@
         ${metricCard("F1-score", run.f1)}
         ${metricCard("Jaccard DIPS", run.jaccard_dips, run.jaccard_dips == null ? "not available" : "placement similarity")}
         ${metricCard("Inference time", null, "LLM generation", {
-          display: run.time_s == null ? "—" : `${run.time_s.toFixed(1)}s`,
+          display: run.time_s == null ? "—" : `${run.time_s.toFixed(2)}s`,
         })}
       </div>
 
@@ -440,7 +440,7 @@
         ${metricCard("Exact match rate", exactRate, `${runs.filter(isExact).length} / ${n} runs`, { display: pct(exactRate) })}
         ${metricCard("Mean Jaccard DIPS", mean(jdRuns.map((r) => r.jaccard_dips)), `over ${jdRuns.length} / ${n} runs`)}
         ${metricCard("Mean inference time", null, "LLM generation", {
-          display: `${fmt(mean(runs.map((r) => r.time_s)), 1)}s`,
+          display: `${fmt(mean(runs.map((r) => r.time_s)), 2)}s`,
         })}
         ${metricCard("Errors per run", null, `${totHigh} high · ${totLow} low · ${runsWithErr} runs affected`, {
           icon: "⚠", color: "var(--bad)", display: fmt(totErr / n, 2),
@@ -737,7 +737,7 @@
             </div>
             <div class="tech-kpi-item">
               <span class="tech-kpi-lbl">Mean Latency</span>
-              <span class="tech-kpi-val">${s.meanTime == null ? "—" : s.meanTime.toFixed(1) + "s"}</span>
+              <span class="tech-kpi-val">${s.meanTime == null ? "—" : s.meanTime.toFixed(2) + "s"}</span>
             </div>
           </div>
         </div>
@@ -827,7 +827,7 @@
         name: "Inference latency",
         desc: "Mean LLM generation time per run",
         getVal: (s) => s.meanTime,
-        fmt: (v) => (v == null ? "—" : `${fmt(v, 1)}s`),
+        fmt: (v) => (v == null ? "—" : `${fmt(v, 2)}s`),
         higherBetter: false,
       },
     ];
@@ -1106,7 +1106,7 @@
               <span class="badge ${exact ? 'ok' : 'bad'}" style="font-weight:700;">${exact ? '✓ Exact Match' : '✗ No Match'}</span>
               <span class="badge" style="color:${scoreColor(run.f1)};border-color:currentColor;">F1 ${fmt(run.f1)}</span>
               ${dipsBadge(run.dips_outcome)}
-              ${run.time_s != null ? `<span class="badge muted">${run.time_s.toFixed(1)}s</span>` : ''}
+              ${run.time_s != null ? `<span class="badge muted">${run.time_s.toFixed(2)}s</span>` : ''}
               <span class="badge ${run.n_errors ? (run.n_high ? 'bad' : 'warn') : 'ok'}">${run.n_errors} err</span>
             </div>
           </div>
